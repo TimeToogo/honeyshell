@@ -19,27 +19,26 @@ PROXY_TTY_PORT=$(echo "$EVENT_DATA" | jq -r .tty_port)
 
 # Connect to proxy ssh port
 echo "Relaying sshd to $PROXY_HOST:$PROXY_SSH_PORT"
-socat TCP:localhost:22 TCP:$PROXY_HOST:$PROXY_SSH_PORT &
+timeout $CONN_TIMEOUT_S socat TCP:localhost:22 TCP:$PROXY_HOST:$PROXY_SSH_PORT &
 SOCAT_SSH_PID=$!
+# Ensure connection is killed when script ends
+trap "kill $SOCAT_SSH_PID >/dev/null 2>&1 || true" EXIT
 
 LOG_DIR=/var/log/sudo-io/session
 # Wait for session to authenticate (will start logging to $LOG_DIR)
 echo "Waiting for logging to $LOG_DIR"
 touch $LOG_DIR/ttyout
-inotifywait  $LOG_DIR/ttyout -e open
+# Allow 10 seconds for ssh session to begin
+timeout 10 inotifywait  $LOG_DIR/ttyout -e open
 
 echo "Redirecting $LOG_DIR/ttyout to $PROXY_HOST:$PROXY_TTY_PORT"
 socat FILE:$LOG_DIR/ttyout,ignoreeof TCP:$PROXY_HOST:$PROXY_TTY_PORT &
 SOCAT_TTY_PID=$!
+trap "kill $SOCAT_TTY_PID >/dev/null 2>&1 || true" EXIT
 
 echo "Waiting for session to complete..."
-tail --pid=$SOCAT_SSH_PID -f /dev/null
+wait $SOCAT_SSH_PID
 echo "Session finished..."
-
-if [[ -d "/proc/$SOCAT_TTY_PID" ]];
-then
-    kill $SOCAT_TTY_PID || true
-fi
 
 # Send the response
 curl -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/response"

@@ -22,10 +22,9 @@ then
 fi
 
 echo "Current external IP: $CURRENT_IP"
-echo "Starting ssh proxy server on port $LISTEN_PORT..."
-mkfifo stdout.sock
-tail -f stdout.sock >&1 &
 while true;
 do
-    socat TCP-LISTEN:$LISTEN_PORT,reuseaddr,fork SYSTEM:"/run/connect.sh stdout.sock"
+    echo "Starting ssh proxy server on port $LISTEN_PORT..."
+    socat TCP-LISTEN:$LISTEN_PORT,reuseaddr,fork SYSTEM:"/run/connect.sh /proc/$$/fd/1"
+    echo "socat exited with status $?"
 done

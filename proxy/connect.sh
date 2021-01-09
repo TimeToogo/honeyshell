@@ -48,7 +48,7 @@ LAMBDA_PAYLOAD="{\
 echo "Invoking lambda function"
 if [[ -z "$AWS_LAMBDA_RIE_API" ]];
 then
-    aws lambda invoke --function-name $AWS_LAMBDA_FUNCTION_NAME --payload "$LAMBDA_PAYLOAD" &
+    aws lambda invoke --function-name $AWS_LAMBDA_FUNCTION_NAME --payload "$LAMBDA_PAYLOAD" $LOG &
 else
     curl -sSf -XPOST http://$AWS_LAMBDA_RIE_API/2015-03-31/functions/function/invocations -d "$LAMBDA_PAYLOAD" &
 fi

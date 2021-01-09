@@ -39,4 +39,6 @@ RUN chmod +x /run/boot.sh
 COPY runtime.sh /run/runtime.sh
 RUN chmod +x /run/runtime.sh
 
+WORKDIR /run/
+
 ENTRYPOINT [ "/run/boot.sh" ]

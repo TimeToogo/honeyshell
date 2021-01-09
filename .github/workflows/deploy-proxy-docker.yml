@@ -1,0 +1,29 @@
+name: Deploy Proxy Docker
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: FranzDiebold/github-env-vars-action@v2
+
+    - run: docker build -t proxy . && docker tag proxy:latest 449964468957.dkr.ecr.us-east-1.amazonaws.com/honeyshell:proxy-$CI_REF_NAME_SLUG
+      working-directory: proxy
+
+    - uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: login to ecr
+      run: aws ecr get-login-password | docker login --username AWS --password-stdin 449964468957.dkr.ecr.us-east-1.amazonaws.com
+
+    - name: deploy to ecr
+      run: docker push 449964468957.dkr.ecr.us-east-1.amazonaws.com/honeyshell:proxy-$CI_REF_NAME_SLUG

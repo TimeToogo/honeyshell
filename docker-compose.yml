@@ -24,5 +24,8 @@ services:
       - AWS_S3_LOGGING_BUCKET=honeyshell-logs
       - AWS_LAMBDA_RIE_API=honeypot:8080
       - CONN_TIMEOUT_S=300
+      - IP_INFO_API_TOKEN=${IP_INFO_API_TOKEN}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     ports:
       - '3333:22' # SSH proxy

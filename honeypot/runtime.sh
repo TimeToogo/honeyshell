@@ -29,12 +29,12 @@ LOG_DIR=/var/log/sudo-io/session
 echo "Waiting for logging to $LOG_DIR"
 touch $LOG_DIR/ttyout
 # Allow 10 seconds for ssh session to begin
-timeout 10 inotifywait  $LOG_DIR/ttyout -e open
+timeout 10 inotifywait $LOG_DIR/ttyout -e open
 
 echo "Redirecting $LOG_DIR/ttyout to $PROXY_HOST:$PROXY_TTY_PORT"
-socat FILE:$LOG_DIR/ttyout,ignoreeof TCP:$PROXY_HOST:$PROXY_TTY_PORT &
+socat -u FILE:$LOG_DIR/ttyout,ignoreeof TCP:$PROXY_HOST:$PROXY_TTY_PORT &
 SOCAT_TTY_PID=$!
-trap "kill $SOCAT_TTY_PID >/dev/null 2>&1 || true" EXIT
+trap "sleep 30 && kill $SOCAT_TTY_PID >/dev/null 2>&1 || true" EXIT
 
 echo "Waiting for session to complete..."
 wait $SOCAT_SSH_PID

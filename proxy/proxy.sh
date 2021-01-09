@@ -25,6 +25,6 @@ echo "Current external IP: $CURRENT_IP"
 while true;
 do
     echo "Starting ssh proxy server on port $LISTEN_PORT..."
-    socat TCP-LISTEN:$LISTEN_PORT,reuseaddr,fork SYSTEM:"/run/connect.sh /proc/$$/fd/1"
+    socat TCP-LISTEN:$LISTEN_PORT,reuseaddr,fork,pktinfo SYSTEM:"/run/connect.sh /proc/$$/fd/1"
     echo "socat exited with status $?"
 done

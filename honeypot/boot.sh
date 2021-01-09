@@ -3,6 +3,7 @@
 set -e
 
 echo "Starting sshd server..."
+ssh-keygen -A
 /usr/sbin/sshd
 
 if [[ -d /aws-lambda-rie ]];

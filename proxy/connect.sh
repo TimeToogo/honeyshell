@@ -50,6 +50,7 @@ then
                 {\
                     \"name\": \"$HONEYPOT_CONTAINER\",\
                     \"environment\": [\
+                        {\"name\": \"CONN_TIMEOUT_S\", \"value\": \"$CONN_TIMEOUT_S\"},\
                         {\"name\": \"PROXY_HOST\", \"value\": \"$CURRENT_IP\"},\
                         {\"name\": \"PROXY_SSH_PORT\", \"value\": \"$INBOUND_PORT_SSH\"},\
                         {\"name\": \"PROXY_TTY_PORT\", \"value\": \"$INBOUND_PORT_TTY\"}\

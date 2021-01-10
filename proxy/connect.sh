@@ -45,12 +45,6 @@ then
     ECS_TASK_DATA="$(aws ecs run-task \
         --cluster $HONEYPOT_CLUSTER \
         --task-definition $HONEYPOT_TASK_DEFINITION \
-        --network-configuration "{\
-            \"awsvpcConfiguration\": {\
-                \"subnets\": [\"$HONEYPOT_SUBNET_1\", \"$HONEYPOT_SUBNET_2\"],\
-                \"assignPublicIp\": \"ENABLED\"\
-            }\
-        }"\
         --overrides "{\
             \"containerOverrides\": [\
                 {\

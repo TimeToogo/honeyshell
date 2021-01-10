@@ -17,7 +17,7 @@ echo "Received connection from $SOCAT_PEERADDR:$SOCAT_PEERPORT"
 # Connection info
 export CONN_START_TIME="$(date -Iseconds | cut -d+ -f1 | tr ':' '_')Z"
 
-# Relay the incoming tcp connection from the lambda function to stdio (tcp from ssh client)
+# Relay the incoming tcp connection from the honeypot to stdio (tcp from ssh client)
 timeout $CONN_TIMEOUT_S socat TCP-LISTEN:0 STDIO <&3 >&4 &
 SOCAT_SSH_PID=$!
 # Ensure socket closed when script exits

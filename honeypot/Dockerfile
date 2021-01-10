@@ -31,6 +31,8 @@ RUN rm -f /run/add-insecure-user.sh
 
 # Configure sshd
 COPY sshd/* /etc/ssh/
+RUN chmod 600 /etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_ecdsa_key /etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_rsa_key
+RUN chmod 644 /etc/ssh/ssh_host_dsa_key.pub /etc/ssh/ssh_host_ecdsa_key.pub /etc/ssh/ssh_host_ed25519_key.pub /etc/ssh/ssh_host_rsa_key.pub
 RUN mkdir -p /run/sshd
 
 # Install boot/runtime scripts

@@ -76,7 +76,7 @@ then
     }
 else
     CONTAINER_ID="$(docker run -d \
-        -e CONN_TIMEOUT_S=60 \
+        -e CONN_TIMEOUT_S=300 \
         -e PROXY_HOST=$CURRENT_IP \
         -e PROXY_SSH_PORT=$INBOUND_PORT_SSH \
         -e PROXY_TTY_PORT=$INBOUND_PORT_TTY \

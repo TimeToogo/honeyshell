@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --no-cache bash socat jq curl python3 py3-pip \
+RUN apk add --no-cache bash socat jq curl python3 docker py3-pip \
     && rm -rf /var/cache/apk/*
 
 RUN pip3 install --upgrade pip \

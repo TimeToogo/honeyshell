@@ -7,6 +7,7 @@ set -e
 # stdout = tcp - incoming from ssh server -> forward to ssh client
 
 LOG=$1
+export AWS_PAGER=""
 
 exec 3<&0 4>&1 # reassign tcp io to fd 3 & 4
 exec 1>$LOG 2>$LOG # send stdin/stderr to parent process stdout
@@ -38,21 +39,60 @@ done
 echo "Listening on port $INBOUND_PORT_SSH for ssh proxy"
 echo "Listening on port $INBOUND_PORT_TTY for tty logging"
 
-# Trigger lambda function to connect back to api
-LAMBDA_PAYLOAD="{\
-    \"host\": \"$CURRENT_IP\",\
-    \"ssh_port\": \"$INBOUND_PORT_SSH\",\
-    \"tty_port\": \"$INBOUND_PORT_TTY\"\
-}"
-
-echo "Invoking lambda function"
-if [[ -z "$AWS_LAMBDA_RIE_API" ]];
+echo "Running honeypot container..."
+if [[ -z "$LOCAL_CONTAINER" ]];
 then
-    aws lambda invoke --function-name $AWS_LAMBDA_FUNCTION_NAME --payload "$LAMBDA_PAYLOAD" $LOG &
+    ECS_TASK_DATA="$(aws ecs run-task \
+        --cluster $HONEYPOT_CLUSTER \
+        --task-definition $HONEYPOT_TASK_DEFINITION \
+        --network-configuration "{\
+            \"awsvpcConfiguration\": {\
+                \"subnets\": [\"$HONEYPOT_SUBNET_1\", \"$HONEYPOT_SUBNET_2\"],\
+                \"assignPublicIp\": \"ENABLED\"\
+            }\
+        }"\
+        --overrides "{\
+            \"containerOverrides\": [\
+                {\
+                    \"name\": \"$HONEYPOT_CONTAINER\",\
+                    \"environment\": [\
+                        {\"name\": \"PROXY_HOST\", \"value\": \"$CURRENT_IP\"},\
+                        {\"name\": \"PROXY_SSH_PORT\", \"value\": \"$INBOUND_PORT_SSH\"},\
+                        {\"name\": \"PROXY_TTY_PORT\", \"value\": \"$INBOUND_PORT_TTY\"}\
+                    ]\
+                }\
+            ]\
+        }")"
+
+    echo "Started ECS task: $ECS_TASK_DATA"
+    ECS_TASK_ARN="$(echo "$ECS_TASK_DATA" | jq -r '.tasks[0].taskArn')"
+    echo "Task ARN: $ECS_TASK_ARN"
+
+    stop_container() {
+        echo "Stopping ECS task $ECS_TASK_ARN"
+        aws ecs stop-task \
+            --cluster $HONEYPOT_CLUSTER \
+            --task $ECS_TASK_ARN
+    }
 else
-    curl -sSf -XPOST http://$AWS_LAMBDA_RIE_API/2015-03-31/functions/function/invocations -d "$LAMBDA_PAYLOAD" &
+    CONTAINER_ID="$(docker run --rm -d \
+        -e CONN_TIMEOUT_S=60 \
+        -e PROXY_HOST=$CURRENT_IP \
+        -e PROXY_SSH_PORT=$INBOUND_PORT_SSH \
+        -e PROXY_TTY_PORT=$INBOUND_PORT_TTY \
+        --network $DOCKER_NETWORK \
+        $HONEYPOT_IMAGE_NAME \
+    )"
+    echo "Started honeypot container: $CONTAINER_ID"
+
+    stop_container() {
+        echo "Killing honeypot container $CONTIAINER_ID..."
+        docker kill $CONTAINER_ID
+    }
 fi
-LAMBDA_INVOKE_PID=$!
+
+
+trap "stop_container" EXIT
 
 # Wait for connections to finish
 echo "Waiting for connection to finish"

@@ -2,22 +2,25 @@
 
 set -e
 
-HEADERS="$(mktemp)"
-# Get an event. The HTTP request will block until one is received
-EVENT_DATA=$(curl -sS -LD "$HEADERS" -X GET "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next")
+if [[ -z "$PROXY_HOST" ]];
+then
+    echo "PROXY_HOST env var must be defined"
+    exit 1
+fi
 
-# Extract request ID by scraping response headers received above
-REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
+if [[ -z "$PROXY_HOST" ]];
+then
+    echo "PROXY_HOST env var must be defined"
+    exit 1
+fi
 
-echo "Received event: $EVENT_DATA"
+if [[ -z "$PROXY_TTY_PORT" ]];
+then
+    echo "PROXY_TTY_PORT env var must be defined"
+    exit 1
+fi
 
-# Parse request params
-echo "Parsing event data..."
-PROXY_HOST=$(echo "$EVENT_DATA" | jq -r .host)
-PROXY_SSH_PORT=$(echo "$EVENT_DATA" | jq -r .ssh_port)
-PROXY_TTY_PORT=$(echo "$EVENT_DATA" | jq -r .tty_port)
-
-# Connect to proxy ssh port
+# Connect to proxy ssh relay port
 echo "Relaying sshd to $PROXY_HOST:$PROXY_SSH_PORT"
 timeout $CONN_TIMEOUT_S socat TCP:localhost:22 TCP:$PROXY_HOST:$PROXY_SSH_PORT &
 SOCAT_SSH_PID=$!
@@ -39,9 +42,3 @@ trap "sleep 30 && kill $SOCAT_TTY_PID >/dev/null 2>&1 || true" EXIT
 echo "Waiting for session to complete..."
 wait $SOCAT_SSH_PID
 echo "Session finished..."
-
-# Send the response
-curl -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/response"
-
-# Force instance to rebuild
-exit 1

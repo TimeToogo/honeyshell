@@ -26,12 +26,6 @@ RUN passwd -d root
 COPY sshd/sshd_config /etc/ssh/sshd_config 
 RUN mkdir -p /run/sshd
 
-# Install lambda runtime emulator if built with --build-arg RUNTIME_EMULATOR=1
-ARG RUNTIME_EMULATOR
-COPY install-rie.sh /run/install-rie.sh
-RUN /run/install-rie.sh
-RUN rm -f /run/install-rie.sh
-
 # Install boot/runtime scripts
 COPY boot.sh /run/boot.sh
 RUN chmod +x /run/boot.sh

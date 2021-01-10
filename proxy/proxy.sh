@@ -21,6 +21,14 @@ then
     export CURRENT_IP="$(curl -sSf https://ipinfo.io/ip)"
 fi
 
+if [[ ! -z "$HEALTH_CHECK_PORT" ]];
+then
+    echo "Will respond to health checks on port $HEALTH_CHECK_PORT"
+    socat TCP-LISTEN:$HEALTH_CHECK_PORT,reuseaddr,fork SYSTEM:"echo 'ok'" &
+    HEALTH_CHECK_PID=$!
+    trap "kill $HEALTH_CHECK_PID" EXIT
+fi
+
 echo "Current external IP: $CURRENT_IP"
 while true;
 do

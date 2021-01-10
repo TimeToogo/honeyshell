@@ -111,7 +111,7 @@ MANIFEST_PAYLOAD="{\
 }"
 
 echo "Uploading manifest to s3://$AWS_S3_LOGGING_BUCKET/$S3_KEY/manifest.json"
-echo "$MANIFEST_PAYLOAD" | aws s3 cp --acl=public-read - s3://$AWS_S3_LOGGING_BUCKET/$S3_KEY/manifest.json
+echo "$MANIFEST_PAYLOAD" | aws s3 cp --acl=public-read --cache-control max-age=31536000 - s3://$AWS_S3_LOGGING_BUCKET/$S3_KEY/manifest.json
 
 echo "Finished"
 

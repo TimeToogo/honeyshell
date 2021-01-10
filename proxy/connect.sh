@@ -75,7 +75,7 @@ then
             --task $ECS_TASK_ARN
     }
 else
-    CONTAINER_ID="$(docker run --rm -d \
+    CONTAINER_ID="$(docker run -d \
         -e CONN_TIMEOUT_S=60 \
         -e PROXY_HOST=$CURRENT_IP \
         -e PROXY_SSH_PORT=$INBOUND_PORT_SSH \

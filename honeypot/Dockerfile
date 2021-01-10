@@ -1,11 +1,12 @@
-# Dockerfile for building ssh honeypot running in AWS Lambda
-FROM ubuntu:20.04
+# Dockerfile for building ssh honeypot running
+FROM alpine
 
-RUN apt update && \
-    apt install -y curl openssh-server sudo socat inotify-tools vim jq
+RUN apk add --no-cache socat openssh sudo inotify-tools \
+    && rm -rf /var/cache/apk/*
 
 # Install and configure sudosh (logging shell) as root user shell
-RUN curl -L https://github.com/cloudposse/sudosh/releases/download/0.3.0/sudosh_linux_amd64 -o /usr/bin/sudosh
+RUN wget https://github.com/cloudposse/sudosh/releases/download/0.3.0/sudosh_linux_amd64 -O /usr/bin/sudosh
+RUN ln -s /bin/sh /usr/bin/bash
 RUN chmod +x /usr/bin/sudosh
 
 RUN echo 'Defaults log_output' >> /etc/sudoers.d/sudosh
@@ -16,7 +17,8 @@ RUN echo 'Defaults iolog_file=session' >> /etc/sudoers.d/sudosh
 RUN mkdir -p /var/log/sudo-io/session
 RUN echo '/usr/bin/sudosh' >> /etc/shells
 
-RUN chsh -s /usr/bin/sudosh root
+# Change root shell to sudosh
+RUN sed -i 's/root:x:0:0:root:\/bin\/ash/root:x:0:0:root:\/usr\/bin\/sudosh/g' /etc/passwd
 
 # Set empty root password
 RUN sed -i 's/root\s*ALL=(ALL:ALL)\s*ALL/root ALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers
@@ -32,6 +34,8 @@ RUN chmod +x /run/boot.sh
 
 COPY runtime.sh /run/runtime.sh
 RUN chmod +x /run/runtime.sh
+
+RUN ssh-keygen -A
 
 WORKDIR /run/
 

@@ -97,7 +97,7 @@ trap "stop_container" EXIT
 echo "Waiting for connection to finish"
 wait $SOCAT_SSH_PID
 
-CONN_END_TIME="$(date -Iseconds | cut -d+ -f1 | tr ':' '-')Z"
+CONN_END_TIME="$(date -Iseconds | cut -d+ -f1)Z"
 echo "Retreiving ip info for $SOCAT_PEERADDR"
 IP_INFO="$(curl -sS -H "Authorization: Bearer $IP_INFO_API_TOKEN" https://ipinfo.io/$SOCAT_PEERADDR)"
 IP_INFO=${IP_INFO:='{}'}

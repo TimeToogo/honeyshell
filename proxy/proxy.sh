@@ -30,6 +30,12 @@ then
 fi
 
 echo "Current external IP: $CURRENT_IP"
+
+if [[ ! -z "$HOSTED_ZONE_ID" ]] && [[ ! -z "$DOMAIN_NAME" ]];
+then
+    /run/update-dns.sh $HOSTED_ZONE_ID $DOMAIN_NAME $CURRENT_IP
+fi
+
 while true;
 do
     echo "Starting ssh proxy server on port $LISTEN_PORT..."

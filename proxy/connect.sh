@@ -19,7 +19,7 @@ CONN_START_TIME="$(date -Iseconds | cut -d+ -f1)Z"
 
 # Use different between large number and timestamp to ensure a decreasing S3 prefix
 # This allows the sorting of ListObjectsV2 to return most recent sessions first
-export S3_KEY="$(printf %016d $(((2 ** 40) - $(date +%s%))))-$(echo "$CONN_START_TIME" | tr ':' '_'))"
+export S3_KEY="$(printf %016d $(((2 ** 40) - $(date +%s%))))-$(echo "$CONN_START_TIME" | tr ':' '_')"
 
 # Relay the incoming tcp connection from the honeypot to stdio (tcp from ssh client)
 timeout $CONN_TIMEOUT_S socat TCP-LISTEN:0 STDIO <&3 >&4 &

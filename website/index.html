@@ -1,1 +1,45 @@
-hello
+<html>
+  <head>
+    <title>Honeyshell</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/app.css" />
+    <script defer async type="module" src="/scripts/app.js"></script>
+
+    <script
+      defer
+      async
+      src="https://cdn.jsdelivr.net/npm/xterm@4/lib/xterm.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/xterm@4/css/xterm.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>Honeyshell</h1>
+        <h2>See what the haxors and b0ts are up to these days</h2>
+      </div>
+    </header>
+    <main>
+      <div class="container">
+        <p class="info">
+          Below is a list of recordings of connections to our ssh honeypot
+        </p>
+        <p class="loading">Loading...</p>
+        <ul class="recordings"></ul>
+        <button class="load-more">Next</button>
+      </div>
+    </main>
+    <footer>
+      <div class="container">
+        <p>I'm a footer</p>
+      </div>
+    </footer>
+  </body>
+</html>

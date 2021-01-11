@@ -27,21 +27,28 @@ SOCAT_SSH_PID=$!
 # Ensure socket closed when script exits
 trap "kill $SOCAT_SSH_PID >/dev/null 2>&1 || true" EXIT
 
-# Write the ttyout to s3 log
-socat -u TCP-LISTEN:0 SYSTEM:"/run/upload-to-s3.sh > $LOG 2>&1" &
+# Write the ttyout to s3 
+socat -u TCP-LISTEN:0 SYSTEM:"/run/upload-to-s3.sh ttyout > $LOG 2>&1" &
 SOCAT_TTY_PID=$!
 trap "kill $SOCAT_TTY_PID >/dev/null 2>&1 || true" EXIT
 
+# Write the timing to s3 
+socat -u TCP-LISTEN:0 SYSTEM:"/run/upload-to-s3.sh timing > $LOG 2>&1" &
+SOCAT_TIM_PID=$!
+trap "kill $SOCAT_TIM_PID >/dev/null 2>&1 || true" EXIT
+
 # Allow socat to bind
-while [[ -z "$INBOUND_PORT_SSH" ]] || [[ -z "$INBOUND_PORT_TTY" ]]
+while [[ -z "$INBOUND_PORT_SSH" ]] || [[ -z "$INBOUND_PORT_TTY" ]] || [[ -z "$INBOUND_PORT_TIM" ]]
 do
     sleep 0.1
     INBOUND_PORT_SSH="$(netstat -ntlp | grep $SOCAT_SSH_PID | head -n1 | awk '{print $4}' | cut -d':' -f2)"
     INBOUND_PORT_TTY="$(netstat -ntlp | grep $SOCAT_TTY_PID | head -n1 | awk '{print $4}' | cut -d':' -f2)"
+    INBOUND_PORT_TIM="$(netstat -ntlp | grep $SOCAT_TIM_PID | head -n1 | awk '{print $4}' | cut -d':' -f2)"
 done
 
 echo "Listening on port $INBOUND_PORT_SSH for ssh proxy"
 echo "Listening on port $INBOUND_PORT_TTY for tty logging"
+echo "Listening on port $INBOUND_PORT_TIM for timing logging"
 
 echo "Running honeypot container..."
 if [[ -z "$LOCAL_CONTAINER" ]];
@@ -57,7 +64,8 @@ then
                         {\"name\": \"CONN_TIMEOUT_S\", \"value\": \"$CONN_TIMEOUT_S\"},\
                         {\"name\": \"PROXY_HOST\", \"value\": \"$CURRENT_IP\"},\
                         {\"name\": \"PROXY_SSH_PORT\", \"value\": \"$INBOUND_PORT_SSH\"},\
-                        {\"name\": \"PROXY_TTY_PORT\", \"value\": \"$INBOUND_PORT_TTY\"}\
+                        {\"name\": \"PROXY_TTY_PORT\", \"value\": \"$INBOUND_PORT_TTY\"},\
+                        {\"name\": \"PROXY_TIM_PORT\", \"value\": \"$INBOUND_PORT_TIM\"}\
                     ]\
                 }\
             ]\
@@ -79,6 +87,7 @@ else
         -e PROXY_HOST=$CURRENT_IP \
         -e PROXY_SSH_PORT=$INBOUND_PORT_SSH \
         -e PROXY_TTY_PORT=$INBOUND_PORT_TTY \
+        -e PROXY_TIM_PORT=$INBOUND_PORT_TIM \
         --network $DOCKER_NETWORK \
         $HONEYPOT_IMAGE_NAME \
     )"

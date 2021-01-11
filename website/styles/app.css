@@ -1,0 +1,36 @@
+@import "header.css";
+@import "main.css";
+@import "footer.css";
+
+:root {
+    --black: #333;
+    --white: #ddd;
+    --green: #00FF00;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-family: 'Courier Prime', monospace;
+    background: var(--black);
+    color: var(--green);
+    text-transform: lowercase;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+button {
+    border: none;
+    background: none;
+    border-bottom: 1px solid var(--green);
+    color: var(--green);
+    text-transform: lowercase;
+}
+
+button:disabled {
+    opacity: 0.3;
+}

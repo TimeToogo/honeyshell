@@ -1,0 +1,14 @@
+footer {
+    padding: 2rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+footer .container {
+    display: flex;
+    justify-content: center;
+}
+
+footer .container p {
+    text-align: center;
+}

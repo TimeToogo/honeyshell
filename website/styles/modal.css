@@ -1,0 +1,82 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.modal:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.modal .body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.modal .close {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  z-index: 10;
+  background: var(--black);
+}
+
+.modal .xterm {
+  width: 100%;
+  max-width: 600px;
+  border: #555 solid 1px;
+  margin-bottom: 3rem;
+  width: 600px;
+  height: 400px;
+  max-width: 100%;
+}
+
+.modal .xterm .mount {
+  width: 100%;
+  height: 100%;
+}
+
+.modal .xterm * {
+  box-sizing: initial;
+}
+
+.modal .info {
+  width: 100%;
+  max-width: 600px;
+  background: var(--black);
+  border: #555 solid 1px;
+  margin-bottom: 3rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.75rem;
+  color: var(--white);
+}
+
+.modal .info > *:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
+.modal .info em {
+  opacity: 0.5;
+}

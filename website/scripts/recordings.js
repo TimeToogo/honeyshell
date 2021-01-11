@@ -3,8 +3,9 @@ import { timeAgo, calcDuration, formatBytes } from "./formatting.js";
 const LOGS_ORIGIN = "https://honeyshell-logs.tunshell.com";
 
 export default class Recordings {
-  constructor() {
+  constructor(modal) {
     console.log("init recordings...");
+    this.modal = modal;
     this.root = document.querySelector("main");
     this.loading = this.root.querySelector(".loading");
     this.recordingsList = this.root.querySelector(".recordings");
@@ -18,6 +19,9 @@ export default class Recordings {
     this.loadNext(10).then(() => this.hideLoading());
 
     this.loadMore.addEventListener("click", () => this.loadNext(10));
+    this.recordingsList.addEventListener("click", (e) =>
+      this.handleRecordingClick(e)
+    );
   }
 
   async loadNext(num) {
@@ -104,6 +108,10 @@ export default class Recordings {
           recording.ttyoutUrl = `${LOGS_ORIGIN}/${item.Key}`;
           recording.ttyoutSize = item.Size;
         }
+
+        if (item.Key.endsWith("timing")) {
+          recording.timingUrl = `${LOGS_ORIGIN}/${item.Key}`;
+        }
       }
 
       recordings = Object.values(recordings);
@@ -187,5 +195,21 @@ export default class Recordings {
     }
 
     this.recordingsList.innerHTML += dom;
+  }
+
+  handleRecordingClick(e) {
+    const recording = e.target.closest(".recordings > li");
+
+    if (!recording) {
+      return;
+    }
+
+    const index = Array.from(this.recordingsList.children).indexOf(recording);
+
+    if (index === -1) {
+      return;
+    }
+
+    this.modal.show(this.recordings[index]);
   }
 }

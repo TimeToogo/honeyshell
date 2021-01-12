@@ -1,10 +1,17 @@
 #!/bin/bash
 
-FILE_KEY=$1
+# Interpret first line of stdin as file key
+read FILE_KEY
 
 if [[ -z "$FILE_KEY" ]];
-then 
-    echo "usage: $0 [file key]"
+then
+    echo "Socket did not send file name"
+    exit 1
+fi
+
+if [[ ! "$FILE_KEY" =~ ^[a-z\.]{1,15}$ ]];
+then
+    echo "Socket sent invalid file name: $FILE_KEY"
     exit 1
 fi
 

@@ -4,10 +4,11 @@ FROM alpine
 RUN apk add --no-cache socat bash openssh sudo inotify-tools \
     && rm -rf /var/cache/apk/*
 
-# Install and configure sudosh (logging shell) as root user shell
+# Install and configure sudosh (logging shell) as user shell
 RUN wget https://github.com/cloudposse/sudosh/releases/download/0.3.0/sudosh_linux_amd64 -O /usr/bin/sudosh
 RUN chmod +x /usr/bin/sudosh
 
+RUN echo 'Defaults log_input' >> /etc/sudoers.d/sudosh
 RUN echo 'Defaults log_output' >> /etc/sudoers.d/sudosh
 RUN echo 'Defaults!/usr/bin/sudoreplay !log_output' >> /etc/sudoers.d/sudosh
 RUN echo 'Defaults!/sbin/reboot !log_output' >> /etc/sudoers.d/sudosh

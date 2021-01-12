@@ -84,7 +84,10 @@ else
     )"
     echo "Started honeypot container: $CONTAINER_ID"
 
-    # docker logs --follow $CONTAINER_ID &
+    docker logs --follow $CONTAINER_ID | while read line 
+        do 
+            echo "[honeypot] $line"
+        done &
 
     stop_container() {
         echo "Killing honeypot container $CONTIAINER_ID..."

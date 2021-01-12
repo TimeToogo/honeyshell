@@ -20,6 +20,7 @@ CONN_START_TIME="$(date -Iseconds | cut -d+ -f1)Z"
 # Use different between large number and timestamp to ensure a decreasing S3 prefix
 # This allows the sorting of ListObjectsV2 to return most recent sessions first
 export S3_KEY="$(printf %016d $(((2 ** 40) - $(date +%s%))))-$(echo "$CONN_START_TIME" | tr ':' '_')"
+export S3_UPLOAD_LOG="$(mktemp)"
 
 # Relay the incoming tcp connection from the honeypot to stdio (tcp from ssh client)
 timeout $CONN_TIMEOUT_S socat TCP-LISTEN:0 STDIO <&3 >&4 &
@@ -118,7 +119,12 @@ MANIFEST_PAYLOAD="{\
 }"
 
 # Upload data to manifest.json file
-echo -e "manifest.json\n$MANIFEST_PAYLOAD" | /run/upload-to-s3.sh
+if [[ "$(stat -c"%s" "$S3_UPLOAD_LOG")" -gt 0 ]];
+then
+    echo -e "manifest.json\n$MANIFEST_PAYLOAD" | /run/upload-to-s3.sh
+else
+    echo "No logs were received from the honeypot (ssh did not authenticate), discarding session..."
+fi
 
 echo "Finished"
 

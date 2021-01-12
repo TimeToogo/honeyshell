@@ -39,11 +39,11 @@ export default class Modal {
     this.xterm = new Terminal({});
     this.xterm.open(this.term.querySelector(".mount"));
 
-    this.renderInfo(recording);
-
     if (!recording.logs) {
       recording.logs = await this.loadLogs(recording);
     }
+
+    this.renderInfo(recording);
 
     this.xterm.resize(
       Number(recording.logs.columns),
@@ -133,11 +133,16 @@ export default class Modal {
 
   renderInfo(recording) {
     this.info.innerHTML = `
-      <span><em>src:</em> ${recording.manifest.peer_ip}:${recording.manifest.peer_port}</span>
-      <span><em>location:</em> ${recording.manifest.ip_info.city}, ${recording.manifest.ip_info.country}</span>
+      <span><em>src:</em> ${recording.manifest.peer_ip}:${
+      recording.manifest.peer_port
+    }</span>
+      <span><em>location:</em> ${recording.manifest.ip_info.city}, ${
+      recording.manifest.ip_info.country
+    }</span>
       <span><em>org:</em> ${recording.manifest.ip_info.org}</span>
       <span><em>start time:</em> ${recording.manifest.time_start}</span>
       <span><em>end time:</em> ${recording.manifest.time_end}</span>
+      <span><em>init cmd:</em> ${recording.logs.runargv.join(" ")}</span>
     `;
   }
 
@@ -151,9 +156,9 @@ export default class Modal {
 
   async replayInitialCommand(recording) {
     await this.writeToTerm(recording.logs.runargv.join(" ") + "\r\n");
-    await this.writeToTerm("\r\nstdout:\r\n")
+    await this.writeToTerm("\r\nstdout:\r\n");
     await this.writeToTerm(recording.stdout);
-    await this.writeToTerm("\r\nstderr:\r\n")
+    await this.writeToTerm("\r\nstderr:\r\n");
     await this.writeToTerm(recording.stderr);
   }
 

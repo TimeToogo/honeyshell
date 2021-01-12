@@ -20,6 +20,7 @@
   bottom: 0;
   z-index: -1;
   background: rgba(0, 0, 0, 0.75);
+  padding: 0 1rem;
 }
 
 .modal .body {
@@ -36,26 +37,28 @@
   position: absolute;
   top: 2px;
   right: 1px;
+  padding: 0.25rem;
   z-index: 10;
   background: var(--black);
+  border: none;
 }
 
-.modal .xterm {
+.modal .body > .xterm {
   width: 100%;
-  max-width: 600px;
+  max-width: 100%;
   border: #555 solid 1px;
   margin-bottom: 3rem;
-  width: 600px;
-  height: 400px;
-  max-width: 100%;
+  padding: 0.5rem;
+  background: #000;
 }
 
-.modal .xterm .mount {
+.modal .body > .xterm .mount {
   width: 100%;
   height: 100%;
+  overflow-x: auto;
 }
 
-.modal .xterm * {
+.modal .body > .xterm .mount * {
   box-sizing: initial;
 }
 

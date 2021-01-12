@@ -1,6 +1,7 @@
 import { timeAgo, calcDuration, formatBytes } from "./formatting.js";
 
 const LOGS_ORIGIN = "https://honeyshell-logs.tunshell.com";
+const FILES_PER_SESSION = 9;
 
 export default class Recordings {
   constructor(modal) {
@@ -12,7 +13,6 @@ export default class Recordings {
     this.loadMore = this.root.querySelector("button.load-more");
 
     this.continuationToken = "";
-    this.showAllConnections = false;
     this.recordings = [];
     this.recordingsBuff = [];
 
@@ -47,15 +47,6 @@ export default class Recordings {
     this.loading.style.display = "none";
   }
 
-  setShowAllConnections(flag) {
-    this.showAllConnections = flag;
-    this.recordings = [];
-    this.recordingsBuff = [];
-    this.renderRecordings();
-    this.showLoading();
-    this.fetchRecordings(10);
-  }
-
   async fetchRecordings(num) {
     const amountNeeded = Math.max(0, num - this.recordingsBuff.length);
     let recs = this.recordingsBuff.splice(
@@ -66,8 +57,8 @@ export default class Recordings {
     if (amountNeeded > 0) {
       const results = await fetch(
         `${LOGS_ORIGIN}/?list-type=2&max-keys=${
-          num * (this.showAllConnections ? 2 : 100)
-        }${
+          num * FILES_PER_SESSION
+        }&cb=${Date.now()}${
           this.continuationToken &&
           `&continuation-token=${this.continuationToken}`
         }`
@@ -109,17 +100,23 @@ export default class Recordings {
           recording.ttyoutSize = item.Size;
         }
 
-        if (item.Key.endsWith("timing")) {
-          recording.timingUrl = `${LOGS_ORIGIN}/${item.Key}`;
+        for (const file of [
+          "timing",
+          "log.json",
+          "stdin",
+          "stdout",
+          "stderr",
+        ]) {
+          if (item.Key.endsWith(file)) {
+            recording[
+              file.replace(/(\..*$)/g, "") + "Url"
+            ] = `${LOGS_ORIGIN}/${item.Key}`;
+          }
         }
       }
 
       recordings = Object.values(recordings);
-
-      if (!this.showAllConnections) {
-        recordings = recordings.filter((i) => i.authenticated);
-      }
-
+      recordings = recordings.filter((i) => i.authenticated);
       recordings = recordings.filter((i) => !!i.manifestUrl);
 
       recs = recs.concat(recordings.slice(0, amountNeeded));
@@ -186,7 +183,7 @@ export default class Recordings {
                 <span class="port">src port: ${data.peer_port}</span>
                 ${
                   (recording.ttyoutSize || "") &&
-                  `<span class="ttySize">tty: ${formatBytes(
+                  `<span class="ttySize">tty (gz): ${formatBytes(
                     recording.ttyoutSize
                   )}</span>`
                 }

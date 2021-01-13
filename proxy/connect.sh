@@ -65,13 +65,14 @@ then
         }")"
 
     ECS_TASK_ARN="$(echo "$ECS_TASK_DATA" | jq -r '.tasks[0].taskArn')"
-    echo "Task ARN: $ECS_TASK_ARN"
+    echo "Started ECS Task ARN: $ECS_TASK_ARN"
 
     stop_container() {
         echo "Stopping ECS task $ECS_TASK_ARN"
         aws ecs stop-task \
             --cluster $HONEYPOT_CLUSTER \
-            --task $ECS_TASK_ARN
+            --task $ECS_TASK_ARN > /dev/null
+        echo "Stopped"
     }
 else
     CONTAINER_ID="$(docker run --rm -d \

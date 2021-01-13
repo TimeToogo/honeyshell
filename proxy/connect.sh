@@ -64,7 +64,6 @@ then
             ]\
         }")"
 
-    echo "Started ECS task: $ECS_TASK_DATA"
     ECS_TASK_ARN="$(echo "$ECS_TASK_DATA" | jq -r '.tasks[0].taskArn')"
     echo "Task ARN: $ECS_TASK_ARN"
 

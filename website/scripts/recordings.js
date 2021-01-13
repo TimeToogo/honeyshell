@@ -60,7 +60,7 @@ export default class Recordings {
           num * FILES_PER_SESSION
         }&cb=${Date.now()}${
           this.continuationToken &&
-          `&continuation-token=${this.continuationToken}`
+          `&continuation-token=${encodeURIComponent(this.continuationToken)}`
         }`
       ).then((r) => r.text());
 
